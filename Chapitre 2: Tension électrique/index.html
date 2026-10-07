@@ -87,8 +87,7 @@
     }
     .resources ul { padding-left: 20px; margin: 0 0 16px; }
     .resources li { margin: 10px 0; overflow-wrap: anywhere; }
-    .resources a, .folder-link { color: var(--accent); }
-    .folder-link { font-size: .9rem; }
+    .resources a { color: var(--accent); }
     footer { margin-top: 34px; color: var(--muted); font-size: .92rem; text-align: center; }
   </style>
 </head>
@@ -107,28 +106,24 @@
         <h2>📘 Cours</h2>
         <p>Résumé du cours sur la tension électrique.</p>
         <div class="resources" data-folder="01-Cours" aria-live="polite"><p>Chargement des ressources…</p></div>
-        <a class="folder-link" href="https://github.com/mrrabeagithub/Physique-S1S-2027/tree/main/Chapitre%202%3A%20Tension%20%C3%A9lectrique/01-Cours">Voir le dossier</a>
       </article>
 
       <article class="card">
         <h2>✏️ Exercices</h2>
         <p>Exercices et activités d'entraînement.</p>
         <div class="resources" data-folder="02-Exercices" aria-live="polite"><p>Chargement des ressources…</p></div>
-        <a class="folder-link" href="https://github.com/mrrabeagithub/Physique-S1S-2027/tree/main/Chapitre%202%3A%20Tension%20%C3%A9lectrique/02-Exercices">Voir le dossier</a>
       </article>
 
       <article class="card">
         <h2>🧪 Simulations</h2>
         <p>Simulations interactives liées au chapitre.</p>
         <div class="resources" data-folder="03-Simulations" aria-live="polite"><p>Chargement des ressources…</p></div>
-        <a class="folder-link" href="https://github.com/mrrabeagithub/Physique-S1S-2027/tree/main/Chapitre%202%3A%20Tension%20%C3%A9lectrique/03-Simulations">Voir le dossier</a>
       </article>
 
       <article class="card">
         <h2>📊 Infographiques</h2>
         <p>Schémas et supports visuels de révision.</p>
         <div class="resources" data-folder="04-Infographiques" aria-live="polite"><p>Chargement des ressources…</p></div>
-        <a class="folder-link" href="https://github.com/mrrabeagithub/Physique-S1S-2027/tree/main/Chapitre%202%3A%20Tension%20%C3%A9lectrique/04-Infographiques">Voir le dossier</a>
       </article>
     </section>
 
@@ -136,7 +131,7 @@
       Physique S1S • Chapitre 2 — Tension électrique
     </footer>
   </main>
-  <noscript><p>Pour consulter les ressources, utilisez les liens « Voir le dossier ».</p></noscript>
+  <noscript><p>Activez JavaScript pour afficher les ressources du chapitre.</p></noscript>
   <script>
 (async () => {
   // Discover files on each visit: resource filenames are never hard-coded.
@@ -157,6 +152,7 @@
     for (const section of sections) {
       const prefix = chapter + "/" + section.dataset.folder + "/";
       const files = data.tree.filter(file => file.type === "blob" && file.path.startsWith(prefix))
+        .filter(file => !/\.(md|markdown|mdown)$/i.test(file.path))
         .filter(file => !file.path.slice(prefix.length).split("/").some(part => part.startsWith(".") || /^(index\.html?|readme(?:\.md)?)$/i.test(part)))
         .sort((a, b) => a.path.localeCompare(b.path, "fr", { numeric: true }));
       section.replaceChildren();
@@ -171,10 +167,7 @@
         const relative = file.path.slice(prefix.length);
         const item = document.createElement("li");
         const link = document.createElement("a");
-        // Markdown opens in GitHub's reader; PDFs, images and HTML open on the site.
-        link.href = /\.md$/i.test(relative)
-          ? "https://github.com/" + repository + "/blob/" + branch + "/" + encodePath(file.path)
-          : "./" + encodePath(section.dataset.folder + "/" + relative);
+        link.href = "./" + encodePath(section.dataset.folder + "/" + relative);
         link.textContent = relative;
         item.append(link);
         list.append(item);
@@ -184,7 +177,7 @@
   } catch (error) {
     for (const section of sections) {
       const message = document.createElement("p");
-      message.textContent = "Consultez le dossier ci-dessous pour accéder aux ressources.";
+      message.textContent = "Les ressources sont temporairement indisponibles. Veuillez actualiser la page dans quelques instants.";
       section.replaceChildren(message);
     }
   } finally {
