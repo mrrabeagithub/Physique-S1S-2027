@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Analog Voltmeter Simulator</title>
+ <!-- Load Tailwind CSS -->
+ <script src="https://cdn.tailwindcss.com"></script>
+ <!-- Load Inter and Orbitron fonts -->
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+ 
+<style>
+ body {
+ font-family: 'Inter', sans-serif;
+ }
+ .font-orbitron {
+ font-family: 'Orbitron', sans-serif;
+ }
+
+ /* Needle Styling */
+ #needle {
+ transform-origin: 100px 90px; /* SVG pivot point */
+ transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* Bouncy spring-like transition */
+ stroke: #ef4444; /* red-500 */
+ stroke-width: 2.5;
+ filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4));
+ }
+
+ /* Dial Tick Styling */
+ .tick-major { stroke: #1f2937; stroke-width: 2; } 
+.tick-minor { stroke: #374151; stroke-width: 1.5; }
+ .tick-sub { stroke: #6b7280; stroke-width: 1; }
+
+ /* Dial Number Styling */
+ .dial-number {
+ font-size: 10px;
+ font-family: 'Orbitron', sans-serif;
+ fill: #1f2937;
+ text-anchor: middle;
+ dominant-baseline: middle;
+ }
+
+ /* Custom radio button styles for scale selector */
+ .scale-radio:checked {
+ background-color: #0284c7; /* sky-600 */
+ border-color: #0284c7;
+ }
+ .scale-radio:checked + label {
+ border-color: #0284c7;
+ color: #0369a1; /* sky-700 */
+ font-weight: 600;
+ }
+
+ /* Source Button Styles */
+ .source-btn {
+ transition: all 0.2s;
+ }
+ .source-btn.active {
+ background-color: #0ea5e9; /* sky-500 */
+ color: white;
+ border-color: #0284c7;
+ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+ }
+ </style>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
+
+ <!-- Main container -->
+ <div class="w-full max-w-5xl bg-white rounded-xl shadow-2xl p-6 md:p-8 grid md:grid-cols-2 gap-8">
+
+ <!-- Column 1: The Voltmeter Simulator -->
+ <div class="flex flex-col">
+ <div class="flex justify-between items-center mb-4">
+ <h1 class="text-2xl font-bold text-gray-800 ml-2">Voltmeter</h1>
+ <div class="flex items-center text-xs text-gray-500">
+ <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+ Sound On
+ </div>
+ </div>
+ 
+<!-- Meter "Case" -->
+ <div class="bg-gray-800 p-4 rounded-lg shadow-lg sticky top-4">
+ <!-- Voltmeter display area -->
+ <div class="w-full max-w-xs mx-auto">
+ <!-- Meter Face -->
+ <div class="relative w-full aspect-[2/1] bg-gradient-to-b from-gray-50 to-gray-200 border-8 border-gray-900 rounded-t-full overflow-hidden shadow-inner">
+ 
+<svg id="voltmeter-face" viewBox="0 0 200 100" class="w-full h-full" preserveAspectRatio="xMidYMax meet">
+ <!-- Dial markings (ticks and numbers) will be added by JS -->
+ <g id="dial-markings"></g>
+ <!-- Needle -->
+ <line id="needle" x1="100" y1="90" x2="100" y2="15" />
+ <!-- Pivot point circle -->
+ <circle cx="100" cy="90" r="4" fill="#1f2937" />
+ </svg>
+
+ <!-- Unit Label -->
+ <div class="absolute bottom-4 left-1/2 -translate-x-1/2">
+ <span class="font-orbitron font-bold text-lg text-gray-700">V</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- Scale Selector -->
+ <fieldset class="mt-6">
+ <legend class="text-center text-lg font-semibold text-gray-100 mb-3">SELECT RANGE (V)</legend>
+ <div id="scale-selector-group" class="grid grid-cols-5 gap-2">
+ <!-- Radio buttons for Ranges -->
+ <div>
+ <input type="radio" id="scale-1v" name="scale" value="1" class="hidden scale-radio">
+ <label for="scale-1v" class="block cursor-pointer rounded-md border border-gray-600 bg-gray-700 py-3 text-center text-gray-200 hover:bg-gray-600 transition-all text-sm font-bold">1V</label>
+ </div>
+ <div>
+ <input type="radio" id="scale-5v" name="scale" value="5" class="hidden scale-radio">
+ <label for="scale-5v" class="block cursor-pointer rounded-md border border-gray-600 bg-gray-700 py-3 text-center text-gray-200 hover:bg-gray-600 transition-all text-sm font-bold">5V</label>
+ </div>
+ <div>
+ <input type="radio" id="scale-10v" name="scale" value="10" class="hidden scale-radio" checked>
+ <label for="scale-10v" class="block cursor-pointer rounded-md border border-gray-600 bg-gray-700 py-3 text-center text-gray-200 hover:bg-gray-600 transition-all text-sm font-bold">10V</label>
+ </div>
+ <!-- New Ranges -->
+ <div>
+ <input type="radio" id="scale-20v" name="scale" value="20" class="hidden scale-radio">
+ <label for="scale-20v" class="block cursor-pointer rounded-md border border-gray-600 bg-gray-700 py-3 text-center text-gray-200 hover:bg-gray-600 transition-all text-sm font-bold">20V</label>
+ </div>
+ <div>
+ <input type="radio" id="scale-100v" name="scale" value="100" class="hidden scale-radio">
+ <label for="scale-100v" class="block cursor-pointer rounded-md border border-gray-600 bg-gray-700 py-3 text-center text-gray-200 hover:bg-gray-600 transition-all text-sm font-bold">100V</label>
+ </div>
+ </div>
+ </fieldset>
+ </div>
+ </div>
+
+ <!-- Column 2: Controls & Visuals -->
+ <div class="flex flex-col space-y-6">
+ 
+<!-- SECTION: Source Selection & Visual -->
+ <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 shadow-sm">
+ <h2 class="text-lg font-bold text-gray-800 mb-3 border-b pb-2">1. Select Power Source</h2>
+ 
+<!-- Visual Battery Representation Area -->
+ <div class="flex justify-center mb-4 h-32 items-center">
+ <svg id="battery-visual" viewBox="0 0 200 120" class="h-full w-auto drop-shadow-md">
+ <!-- Content injected by JS -->
+ </svg>
+ </div>
+
+ <!-- Source Buttons -->
+ <div class="grid grid-cols-3 gap-2 mb-4">
+ <button class="source-btn active rounded-md border border-gray-300 bg-white py-2 text-sm font-medium text-gray-700 hover:bg-gray-50" onclick="setSource('aa')">1.5V AA</button>
+ <button class="source-btn rounded-md border border-gray-300 bg-white py-2 text-sm font-medium text-gray-700 hover:bg-gray-50" onclick="setSource('9v')">9V Bat</button>
+ <button class="source-btn rounded-md border border-gray-300 bg-white py-2 text-sm font-medium text-gray-700 hover:bg-gray-50" onclick="setSource('car')">12V Car</button>
+ <button class="source-btn rounded-md border border-gray-300 bg-white py-2 text-sm font-medium text-gray-700 hover:bg-gray-50" onclick="setSource('custom')">Custom</button>
+ <button class="source-btn col-span-2 rounded-md border border-gray-300 bg-white py-2 text-sm font-medium text-purple-700 hover:bg-purple-50 border-purple-200" onclick="setSource('mystery')">? Mystery ?</button>
+ </div>
+
+ <!-- Custom Voltage Controls (Hidden unless Custom is selected) -->
+ <div id="custom-controls" class="hidden space-y-2 bg-blue-50 p-3 rounded-lg border border-blue-100">
+ <div class="flex justify-between text-sm font-medium text-blue-800">
+ <label for="custom-slider">Set Voltage:</label>
+ <span id="custom-val-display">0.00 V</span>
+ </div>
+ <!-- Increased max to 110V to accommodate the new 100V scale -->
+ <input type="range" id="custom-slider" min="0" max="110" step="0.1" value="0" class="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer accent-blue-600">
+ </div>
+ 
+<!-- Mystery Controls (Hidden unless Mystery is selected) -->
+ <div id="mystery-controls" class="hidden text-center">
+ <button id="new-mystery-btn" class="bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold py-2 px-4 rounded-lg shadow transition-all">
+ Generate New Random Voltage
+ </button>
+ </div>
+ </div>
+
+ <!-- SECTION: Info Panel -->
+ <div>
+ <h2 class="text-lg font-bold text-gray-800 mb-2">2. Read Dial Info</h2>
+ <div class="bg-gray-100 rounded-lg p-3 grid grid-cols-3 gap-2 text-center shadow-inner text-sm">
+ <div>
+ <span class="block text-[10px] font-bold text-gray-500 uppercase">Range</span>
+ <span id="range-display" class="block text-lg font-bold text-sky-700">10 V</span>
+ </div>
+ <div>
+ <span class="block text-[10px] font-bold text-gray-500 uppercase">Divisions</span>
+ <span id="divisions-display" class="block text-lg font-bold text-sky-700">50</span>
+ </div>
+ <div>
+ <span class="block text-[10px] font-bold text-gray-500 uppercase">Value/Div</span>
+ <span id="v-per-div-display" class="block text-lg font-bold text-sky-700">0.20 V</span>
+ </div>
+ </div>
+ </div>
+
+ <!-- SECTION: Calculation -->
+ <div>
+ <h2 class="text-lg font-bold text-gray-800 mb-2">3. Check Reading</h2>
+ <p class="text-xs text-gray-500 mb-2">Read the needle, calculate voltage, and check your answer.</p>
+ 
+<form id="calculation-form" class="space-y-3">
+ <div class="grid grid-cols-2 gap-3">
+ <div>
+ <label class="block text-xs font-medium text-gray-700">Needle (divs)</label>
+ <input type="number" id="division-input" step="0.1" class="mt-1 block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2 border" placeholder="e.g. 25.5">
+ </div>
+ <div>
+ <label class="block text-xs font-medium text-gray-700">Voltage (V)</label>
+ <input type="number" id="voltage-input" step="0.01" class="mt-1 block w-full text-sm rounded-md border-gray-300 shadow-sm focus:border-sky-500 focus:ring-sky-500 p-2 border" placeholder="e.g. 5.10">
+ </div>
+ </div>
+ <button id="check-btn" type="submit" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all text-sm">
+ Check Answer
+ </button>
+ </form>
+ </div>
+ 
+<!-- Result Panel -->
+ <div id="result-panel" class="hidden p-3 rounded-lg text-white text-sm font-medium shadow-md">
+ <span id="result-message"></span>
+ </div>
+
+ </div>
+
+ <!-- Credential Footer -->
+ <div class="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-gray-200 flex flex-col items-center justify-center">
+ <p class="text-sm font-semibold text-gray-700">Rabih Abdel Ghafour | High-School Physics Teacher & Solar/Smart Systems Technician</p>
+ <p class="text-xs text-gray-500 mt-1 mb-3">Interactive Physics Resources for Grades 10-12</p>
+ <div class="inline-block px-3 py-1 border-2 border-gray-800 text-gray-800 font-mono text-xs font-bold uppercase tracking-widest transform rotate-[-2deg] opacity-70">
+ PHYSICS DEPARTMENT Rabih A.G.
+ </div>
+ </div>
+
+ </div>
+
+ <script>
+ // --- CONSTANTS & STATE ---
+ const TOTAL_DIVISIONS = 50;
+ const MIN_ANGLE = -90;
+ const MAX_ANGLE = 90; 
+const ANGLE_RANGE = 180;
+ 
+let currentSource = 'aa'; // aa, 9v, car, custom, mystery
+ let currentVoltage = 1.5; // Actual voltage being applied
+ let selectedScale = 10;
+ let isPinned = false; // Track if needle is stuck at max
+
+ // --- DOM ELEMENTS ---
+ const needle = document.getElementById('needle');
+ const dialMarkings = document.getElementById('dial-markings');
+ const scaleSelector = document.getElementById('scale-selector-group');
+ const batteryVisual = document.getElementById('battery-visual');
+ const customControls = document.getElementById('custom-controls');
+ const mysteryControls = document.getElementById('mystery-controls');
+ const customSlider = document.getElementById('custom-slider');
+ const customValDisplay = document.getElementById('custom-val-display');
+ const rangeDisplay = document.getElementById('range-display');
+ const divisionsDisplay = document.getElementById('divisions-display');
+ const vPerDivDisplay = document.getElementById('v-per-div-display');
+ const divisionInput = document.getElementById('division-input');
+ const voltageInput = document.getElementById('voltage-input');
+ const resultPanel = document.getElementById('result-panel');
+ const resultMessage = document.getElementById('result-message');
+
+ // --- AUDIO SYSTEM ---
+ const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+ // Resume context on any user interaction (needed for browsers)
+ function ensureAudio() {
+ if (audioCtx.state === 'suspended') {
+ audioCtx.resume();
+ }
+ }
+
+ function playTone(freq, type, duration, vol = 0.1) {
+ ensureAudio();
+ const osc = audioCtx.createOscillator();
+ const gain = audioCtx.createGain();
+ osc.type = type;
+ osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+ 
+// Envelope for smooth sound
+ gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+ gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+ 
+osc.connect(gain);
+ gain.connect(audioCtx.destination);
+ osc.start();
+ osc.stop(audioCtx.currentTime + duration);
+ }
+
+ function playSuccessSound() {
+ // High pitched "Ding-Dong"
+ playTone(880, 'sine', 0.1, 0.1);
+ setTimeout(() => playTone(1174, 'sine', 0.6, 0.1), 100);
+ }
+
+ function playErrorSound() {
+ // Low pitched "Buzz"
+ playTone(150, 'sawtooth', 0.3, 0.05);
+ }
+
+ function playClickSound() {
+ // Short sharp click/tick
+ ensureAudio();
+ const osc = audioCtx.createOscillator();
+ const gain = audioCtx.createGain();
+ osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+ gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+ gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.03);
+ osc.connect(gain);
+ gain.connect(audioCtx.destination);
+ osc.start();
+ osc.stop(audioCtx.currentTime + 0.03);
+ }
+
+ // --- DRAWING FUNCTIONS (SVG) ---
+ const svgNS = "http://www.w3.org/2000/svg";
+
+ function drawBatteryAA() {
+ return `
+ <rect x="85" y="20" width="30" height="80" rx="2" fill="#374151" stroke="#1f2937" stroke-width="2"/>
+ <rect x="85" y="25" width="30" height="60" fill="#e5e7eb" opacity="0.1"/>
+ <rect x="92" y="12" width="16" height="8" rx="2" fill="#d97706" stroke="#b45309" stroke-width="2"/>
+ <text x="100" y="70" font-family="Orbitron" font-size="12" fill="white" text-anchor="middle" transform="rotate(-90 100 70)">1.5V AA</text>
+ <text x="100" y="40" font-family="Inter" font-size="14" font-weight="bold" fill="#d97706" text-anchor="middle">+</text>
+ `;
+ }
+
+ function drawBattery9V() {
+ return `
+ <rect x="70" y="40" width="60" height="70" rx="4" fill="#1f2937" stroke="black" stroke-width="2"/>
+ <circle cx="85" cy="32" r="6" fill="#9ca3af" stroke="#4b5563" stroke-width="2"/>
+ <polygon points="105,28 120,28 117,38 108,38" fill="#9ca3af" stroke="#4b5563" stroke-width="2"/>
+ <text x="100" y="80" font-family="Orbitron" font-size="14" fill="white" text-anchor="middle">9V</text>
+ <text x="100" y="95" font-family="Inter" font-size="10" fill="#fbbf24" text-anchor="middle">ALKALINE</text>
+ `;
+ }
+
+ function drawBatteryCar() {
+ return `
+ <rect x="50" y="50" width="100" height="60" rx="2" fill="#1e3a8a" stroke="#172554" stroke-width="2"/>
+ <rect x="50" y="40" width="100" height="10" rx="1" fill="#172554"/>
+ <rect x="60" y="30" width="10" height="15" fill="#94a3b8" stroke="#475569"/>
+ <rect x="130" y="30" width="10" height="15" fill="#94a3b8" stroke="#475569"/>
+ <text x="100" y="85" font-family="Orbitron" font-size="12" fill="white" text-anchor="middle">12V AUTO</text>
+ <text x="65" y="65" font-family="Inter" font-size="16" fill="#ef4444" font-weight="bold">+</text>
+ <text x="135" y="65" font-family="Inter" font-size="16" fill="white" font-weight="bold">-</text>
+ `;
+ }
+
+ function drawPowerSupply() {
+ return `
+ <rect x="50" y="30" width="100" height="80" rx="4" fill="#d1d5db" stroke="#4b5563" stroke-width="3"/>
+ <rect x="60" y="40" width="80" height="30" fill="#1f2937" rx="2"/>
+ <text x="100" y="60" font-family="monospace" font-size="16" fill="#ef4444" text-anchor="middle" font-weight="bold">V_ADJ</text>
+ <circle cx="70" cy="90" r="8" fill="#ef4444" stroke="#991b1b"/>
+ <circle cx="130" cy="90" r="8" fill="#1f2937" stroke="black"/>
+ <text x="100" y="105" font-family="Inter" font-size="10" fill="#374151" text-anchor="middle">DC POWER</text>
+ `;
+ }
+
+ function drawMystery() {
+ return `
+ <rect x="60" y="30" width="80" height="80" rx="8" fill="#7e22ce" stroke="#581c87" stroke-width="3"/>
+ <text x="100" y="85" font-family="Inter" font-size="40" fill="white" text-anchor="middle" font-weight="bold">?</text>
+ `;
+ }
+
+ // --- CORE LOGIC ---
+
+ function setSource(type) {
+ ensureAudio(); // Init audio on click
+ currentSource = type;
+ 
+// Update UI Buttons
+ document.querySelectorAll('.source-btn').forEach(btn => {
+ if(btn.getAttribute('onclick').includes(type)) {
+ btn.classList.add('active');
+ } else {
+ btn.classList.remove('active');
+ }
+ });
+
+ // Update Visuals & Controls
+ customControls.classList.add('hidden');
+ mysteryControls.classList.add('hidden');
+
+ let svgContent = '';
+ switch(type) {
+ case 'aa':
+ svgContent = drawBatteryAA();
+ currentVoltage = 1.5;
+ break;
+ case '9v':
+ svgContent = drawBattery9V();
+ currentVoltage = 9.0;
+ break;
+ case 'car':
+ svgContent = drawBatteryCar();
+ currentVoltage = 12.6; // typical fully charged
+ break;
+ case 'custom':
+ svgContent = drawPowerSupply();
+ customControls.classList.remove('hidden');
+ currentVoltage = parseFloat(customSlider.value);
+ break;
+ case 'mystery':
+ svgContent = drawMystery();
+ mysteryControls.classList.remove('hidden');
+ generateMysteryVoltage(); // Set initial random
+ break;
+ }
+ batteryVisual.innerHTML = svgContent;
+ 
+if (type !== 'mystery') {
+ updateMeter();
+ clearResult();
+ }
+ }
+
+ function generateMysteryVoltage() {
+ ensureAudio();
+ // Random between 0.5 and 100
+ currentVoltage = (Math.random() * 99.0 + 0.5).toFixed(2);
+ updateMeter();
+ clearResult();
+ // console.log("Mystery Voltage: " + currentVoltage);
+ }
+
+ function createDial() {
+ dialMarkings.innerHTML = ''; 
+const cx = 100, cy = 90;
+ const radius = 80;
+ const labelRadius = 70;
+
+ for (let v = 0; v <= TOTAL_DIVISIONS; v++) {
+ const angle = MIN_ANGLE + (v / TOTAL_DIVISIONS) * ANGLE_RANGE;
+ let tickLength, tickClass;
+
+ if (v % 10 === 0) { 
+tickLength = 12; tickClass = 'tick-major';
+ } else if (v % 5 === 0) { 
+tickLength = 8; tickClass = 'tick-minor';
+ } else { 
+tickLength = 5; tickClass = 'tick-sub';
+ }
+
+ const tick = document.createElementNS(svgNS, 'line');
+ tick.setAttribute('x1', cx);
+ tick.setAttribute('y1', cy - (radius - tickLength));
+ tick.setAttribute('x2', cx);
+ tick.setAttribute('y2', cy - radius);
+ tick.setAttribute('class', tickClass);
+ tick.setAttribute('transform', `rotate(${angle} ${cx} ${cy})`);
+ dialMarkings.appendChild(tick);
+
+ if (v % 10 === 0) {
+ const angleRad = (angle - 90) * (Math.PI / 180);
+ const labelX = cx + labelRadius * Math.cos(angleRad);
+ const labelY = cy + labelRadius * Math.sin(angleRad) + 3;
+ const text = document.createElementNS(svgNS, 'text');
+ text.setAttribute('x', labelX);
+ text.setAttribute('y', labelY);
+ text.setAttribute('class', 'dial-number');
+ text.textContent = v.toString();
+ dialMarkings.appendChild(text);
+ }
+ }
+ }
+
+ function updateMeter() {
+ const voltageToMeasure = parseFloat(currentVoltage);
+ let angle;
+
+ // Off-scale Logic
+ if (voltageToMeasure > selectedScale) {
+ angle = MAX_ANGLE + 2; // Peg it slightly past max
+ if (!isPinned) {
+ playClickSound(); // Play click when hitting max
+ isPinned = true;
+ }
+ } else {
+ const scaleFraction = voltageToMeasure / selectedScale;
+ angle = MIN_ANGLE + (scaleFraction * ANGLE_RANGE);
+ isPinned = false;
+ }
+ needle.style.transform = `rotate(${angle}deg)`;
+ }
+
+ function updateInfoPanel() {
+ ensureAudio();
+ selectedScale = parseFloat(document.querySelector('input[name="scale"]:checked').value);
+ const valuePerDivision = selectedScale / TOTAL_DIVISIONS;
+ rangeDisplay.textContent = `${selectedScale} V`;
+ vPerDivDisplay.textContent = `${valuePerDivision.toFixed(2)} V/div`;
+ updateMeter(); // Re-update meter whenever scale changes
+ }
+
+ // --- EVENT LISTENERS ---
+
+ // Slider Input
+ customSlider.addEventListener('input', (e) => {
+ if (currentSource === 'custom') {
+ currentVoltage = parseFloat(e.target.value);
+ customValDisplay.textContent = currentVoltage.toFixed(2) + ' V';
+ updateMeter();
+ }
+ });
+
+ // Scale Change
+ scaleSelector.addEventListener('change', (e) => {
+ if (e.target.name === 'scale') {
+ updateInfoPanel();
+ }
+ });
+
+ // Mystery Button
+ document.getElementById('new-mystery-btn').addEventListener('click', generateMysteryVoltage);
+
+ // Calculation Check
+ document.getElementById('check-btn').addEventListener('click', (e) => {
+ e.preventDefault();
+ ensureAudio(); // Make sure audio is ready
+ 
+const userDivs = parseFloat(divisionInput.value);
+ const userVolts = parseFloat(voltageInput.value);
+ const trueVolts = parseFloat(currentVoltage);
+
+ if (isNaN(userDivs) || isNaN(userVolts)) {
+ showResult("Please enter both values.", "error");
+ playErrorSound();
+ return;
+ }
+
+ const isOffScale = trueVolts > selectedScale;
+ const valuePerDiv = selectedScale / TOTAL_DIVISIONS;
+ const trueDivs = isOffScale ? TOTAL_DIVISIONS : (trueVolts / selectedScale) * TOTAL_DIVISIONS;
+ 
+// Tolerances
+ const divTol = 0.5; 
+const voltTol = valuePerDiv * 0.6; 
+
+if (Math.abs(userDivs - trueDivs) > divTol) {
+ showResult(`Needle reading incorrect. It's around ${trueDivs.toFixed(1)} divisions.`, "error");
+ playErrorSound();
+ return;
+ }
+
+ if (isOffScale) {
+ if (Math.abs(userVolts - selectedScale) < 1.0) { 
+showResult(`Correct reading (pinned)! But voltage is OFF SCALE (> ${selectedScale}V). Switch range!`, "warning");
+ playSuccessSound(); // Technically correct observation
+ } else {
+ showResult(`Reading correct (pinned), but check voltage logic.`, "error");
+ playErrorSound();
+ }
+ return;
+ }
+
+ if (Math.abs(userVolts - trueVolts) < voltTol) {
+ showResult("Correct! Great job reading the meter.", "success");
+ playSuccessSound();
+ } else {
+ showResult(`Reading correct, but calculation wrong. Formula: Divs × V/Div`, "error");
+ playErrorSound();
+ }
+ });
+
+ function showResult(msg, type) {
+ resultMessage.textContent = msg;
+ resultPanel.className = 'p-3 rounded-lg text-white text-sm font-medium shadow-md block';
+ if (type === 'success') resultPanel.classList.add('bg-green-600');
+ if (type === 'error') resultPanel.classList.add('bg-red-600');
+ if (type === 'warning') resultPanel.classList.add('bg-yellow-600');
+ }
+
+ function clearResult() {
+ resultPanel.classList.add('hidden');
+ divisionInput.value = '';
+ voltageInput.value = '';
+ }
+
+ // Init
+ window.setSource = setSource; // Expose to HTML
+ createDial();
+ updateInfoPanel();
+ setSource('aa'); // Start with AA battery
+
+ </script>
+</body>
+</html>
