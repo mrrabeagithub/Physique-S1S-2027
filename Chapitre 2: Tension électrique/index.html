@@ -167,7 +167,8 @@
         const relative = file.path.slice(prefix.length);
         const item = document.createElement("li");
         const link = document.createElement("a");
-        link.href = "./" + encodePath(section.dataset.folder + "/" + relative);
+        // Version resource URLs by Git blob SHA to avoid stale PDF caches.
+        link.href = "./" + encodePath(section.dataset.folder + "/" + relative) + "?v=" + encodeURIComponent(file.sha);
         link.textContent = relative;
         item.append(link);
         list.append(item);
