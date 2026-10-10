@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chapitre 3 — Le courant électrique | Physique S1S</title>
+  <meta name="description" content="Cours, exercices, simulations et infographiques sur la courant électrique pour S1S.">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --accent: #2457d6;
+      --border: #e4e7ec;
+      --soft: #eef3ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #111827;
+        --text: #f8fafc;
+        --muted: #cbd5e1;
+        --accent: #7aa2ff;
+        --border: #334155;
+        --soft: #172554;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 28px 18px 48px; }
+    nav { margin-bottom: 18px; }
+    nav a { color: var(--accent); text-decoration: none; font-weight: 650; }
+    header {
+      padding: 30px 26px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--card);
+      margin-bottom: 24px;
+    }
+    .eyebrow {
+      color: var(--accent);
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-size: .82rem;
+    }
+    h1 { margin: 5px 0 8px; font-size: clamp(1.9rem, 5vw, 2.8rem); }
+    header p { margin: 0; color: var(--muted); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--card);
+    }
+    .card h2 { margin: 0 0 8px; font-size: 1.25rem; }
+    .card p { color: var(--muted); margin: 0 0 16px; }
+    .button {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .soon {
+      display: inline-block;
+      padding: 8px 11px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: .9rem;
+    }
+    .resources ul { padding-left: 20px; margin: 0 0 16px; }
+    .resources li { margin: 10px 0; overflow-wrap: anywhere; }
+    .resources a { color: var(--accent); }
+    footer { margin-top: 34px; color: var(--muted); font-size: .92rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <nav><a href="../">← Retour à l'accueil S1S</a></nav>
+
+    <header>
+      <div class="eyebrow">Chapitre 3</div>
+      <h1>Le courant électrique</h1>
+      <p>Retrouvez ici les supports de cours, exercices, simulations et infographiques du chapitre.</p>
+    </header>
+
+    <section class="grid">
+      <article class="card">
+        <h2>📘 Cours</h2>
+        <p>Résumé du cours sur la courant électrique.</p>
+        <div class="resources" data-folder="01-Cours" aria-live="polite"><p>Chargement des ressources…</p></div>
+      </article>
+
+      <article class="card">
+        <h2>✏️ Exercices</h2>
+        <p>Exercices et activités d'entraînement.</p>
+        <div class="resources" data-folder="02-Exercices" aria-live="polite"><p>Chargement des ressources…</p></div>
+      </article>
+
+      <article class="card">
+        <h2>🧪 Simulations</h2>
+        <p>Simulations interactives liées au chapitre.</p>
+        <div class="resources" data-folder="03-Simulations" aria-live="polite"><p>Chargement des ressources…</p></div>
+      </article>
+
+      <article class="card">
+        <h2>📊 Infographiques</h2>
+        <p>Schémas et supports visuels de révision.</p>
+        <div class="resources" data-folder="04-Infographiques" aria-live="polite"><p>Chargement des ressources…</p></div>
+      </article>
+    </section>
+
+    <footer>
+      Physique S1S • Chapitre 3 — Le courant électrique
+    </footer>
+  </main>
+  <noscript><p>Activez JavaScript pour afficher les ressources du chapitre.</p></noscript>
+  <script>
+(async () => {
+  // Discover files on each visit: resource filenames are never hard-coded.
+  const repository = "mrrabeagithub/Physique-S1S-2027";
+  const branch = "main";
+  const chapter = decodeURIComponent(new URL(".", location.href).pathname.split("/").filter(Boolean).pop());
+  const encodePath = path => path.split("/").map(encodeURIComponent).join("/");
+  const sections = [...document.querySelectorAll("[data-folder]")];
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 12000);
+  try {
+    const response = await fetch("https://api.github.com/repos/" + repository + "/git/trees/" + branch + "?recursive=1", {
+      signal: controller.signal, cache: "no-store", headers: { Accept: "application/vnd.github+json" }
+    });
+    if (!response.ok) throw new Error("Resources unavailable");
+    const data = await response.json();
+    if (!Array.isArray(data.tree) || data.truncated) throw new Error("Incomplete listing");
+    for (const section of sections) {
+      const prefix = chapter + "/" + section.dataset.folder + "/";
+      const files = data.tree.filter(file => file.type === "blob" && file.path.startsWith(prefix))
+        .filter(file => !/\.(md|markdown|mdown)$/i.test(file.path))
+        .filter(file => !file.path.slice(prefix.length).split("/").some(part => part.startsWith(".") || /^(index\.html?|readme(?:\.md)?)$/i.test(part)))
+        .sort((a, b) => a.path.localeCompare(b.path, "fr", { numeric: true }));
+      section.replaceChildren();
+      if (!files.length) {
+        const message = document.createElement("p");
+        message.textContent = "Bientôt disponible";
+        section.append(message);
+        continue;
+      }
+      const list = document.createElement("ul");
+      for (const file of files) {
+        const relative = file.path.slice(prefix.length);
+        const item = document.createElement("li");
+        const link = document.createElement("a");
+        // Version resource URLs by Git blob SHA to avoid stale PDF caches.
+        link.href = "./" + encodePath(section.dataset.folder + "/" + relative) + "?v=" + encodeURIComponent(file.sha);
+        link.textContent = relative;
+        item.append(link);
+        list.append(item);
+      }
+      section.append(list);
+    }
+  } catch (error) {
+    for (const section of sections) {
+      const message = document.createElement("p");
+      message.textContent = "Les ressources sont temporairement indisponibles. Veuillez actualiser la page dans quelques instants.";
+      section.replaceChildren(message);
+    }
+  } finally {
+    clearTimeout(timeout);
+  }
+})();
+</script>
+</body>
+</html>
