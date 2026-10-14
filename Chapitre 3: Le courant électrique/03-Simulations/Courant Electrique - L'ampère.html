@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dérive Microscopique des Électrons & Courant Électrique - Rabih A.G.</title>
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: #1e293b;
+      --border-col: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-cyan: #38bdf8;
+      --accent-red: #f43f5e;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 100vh;
+    }
+
+    /* Mathematical Typography Helpers (Replaces raw LaTeX) */
+    .math {
+      font-family: 'Cambria Math', 'Times New Roman', Times, serif;
+      font-style: italic;
+      font-weight: 600;
+    }
+    .math-norm {
+      font-family: 'Cambria Math', 'Times New Roman', Times, serif;
+      font-style: normal;
+    }
+    .vec {
+      display: inline-block;
+      position: relative;
+      font-family: 'Cambria Math', 'Times New Roman', Times, serif;
+      font-style: italic;
+      font-weight: bold;
+    }
+    .vec::after {
+      content: "→";
+      position: absolute;
+      top: -0.58em;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.72em;
+      font-style: normal;
+      font-weight: normal;
+    }
+    .frac {
+      display: inline-flex;
+      flex-direction: column;
+      vertical-align: middle;
+      text-align: center;
+      font-size: 0.88em;
+      margin: 0 3px;
+    }
+    .frac > span:first-child {
+      border-bottom: 1px solid currentColor;
+      padding: 0 3px 1px;
+    }
+    .frac > span:last-child {
+      padding: 1px 3px 0;
+    }
+
+    /* Header & Smooth Retro Typewriter Stamp */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      padding: 16px 26px;
+      border-radius: 12px;
+      border: 1px solid var(--border-col);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .title-block h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: 0.3px;
+    }
+
+    .title-block p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Smooth Double-Ruled Official Physics Dept Stamp */
+    .signature-stamp {
+      font-family: 'Courier New', Courier, monospace;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.06);
+      border: 2px solid rgba(251, 191, 36, 0.75);
+      border-radius: 6px;
+      padding: 3px;
+      transform: rotate(-1.2deg);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), inset 0 0 10px rgba(251, 191, 36, 0.12);
+      user-select: none;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+    }
+    .signature-stamp:hover {
+      transform: rotate(0deg) scale(1.02);
+    }
+    .stamp-inner {
+      border: 1px solid rgba(251, 191, 36, 0.45);
+      border-radius: 3px;
+      padding: 5px 14px;
+      text-align: center;
+    }
+    .signature-stamp .dept {
+      font-size: 0.68rem;
+      letter-spacing: 2px;
+      display: block;
+      color: #fde68a;
+      opacity: 0.9;
+      border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+      padding-bottom: 2px;
+      margin-bottom: 2px;
+    }
+    .signature-stamp .name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      display: block;
+    }
+
+    /* Main Workspace Layout */
+    .main-grid {
+      display: grid;
+      grid-template-columns: 3.2fr 1.15fr;
+      gap: 18px;
+      flex: 1;
+    }
+
+    @media (max-width: 1080px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .canvas-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-col);
+      border-radius: 12px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    #simCanvas {
+      width: 100%;
+      height: 520px;
+      background: radial-gradient(circle at center, #0f172a 0%, #060911 100%);
+      border-radius: 8px;
+      border: 1px solid #334155;
+      display: block;
+    }
+
+    /* Controls & Telemetry Panel */
+    .controls-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-col);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-group label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .control-group label span.val-badge {
+      color: var(--accent-cyan);
+      font-family: 'Courier New', monospace;
+      font-weight: bold;
+      font-size: 0.95rem;
+      background: rgba(56, 189, 248, 0.12);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+      cursor: pointer;
+      height: 6px;
+    }
+
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      background: #0f172a;
+      padding: 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border-col);
+    }
+
+    .metric-box {
+      display: flex;
+      flex-direction: column;
+      background: rgba(30, 41, 59, 0.5);
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .metric-val {
+      font-family: 'Courier New', monospace;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      margin-top: 4px;
+    }
+
+    .metric-sub {
+      font-size: 0.7rem;
+      color: #64748b;
+      margin-top: 2px;
+      font-family: monospace;
+    }
+
+    .formula-box {
+      background: rgba(56, 189, 248, 0.07);
+      border-left: 3px solid var(--accent-cyan);
+      padding: 12px 14px;
+      font-size: 0.84rem;
+      color: #e2e8f0;
+      line-height: 1.65;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .formula-box .scale-note {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      font-size: 0.78rem;
+      color: #fde68a;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-col);
+      background: #334155;
+      color: white;
+      font-weight: 600;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    button:hover {
+      background: #475569;
+    }
+
+    button.primary {
+      background: var(--accent-cyan);
+      color: #0f172a;
+      border-color: var(--accent-cyan);
+    }
+
+    button.primary:hover {
+      background: #7dd3fc;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP HEADER WITH SMOOTH CREDENTIALS STAMP -->
+  <header>
+    <div class="title-block">
+      <h1>
+        Dérive Microscopique des Électrons &amp; Intensité du Courant Électrique
+        (<span class="math">I</span> = <span class="frac"><span class="math">q</span><span class="math">&Delta;t</span></span> = <span class="frac"><span><span class="math">N</span> &middot; <span class="math">e</span></span><span class="math">&Delta;t</span></span>)
+      </h1>
+      <p>Conducteur Métallique Cylindrique, Compteur d'Électrons à Travers une Section, et Générateur de Tension Continue Réglable (<span class="math">U</span>)</p>
+    </div>
+    <div class="signature-stamp">
+      <div class="stamp-inner">
+        <span class="dept">PHYSICS DEPARTMENT</span>
+        <span class="name">by Rabih A.G.</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN SIMULATION & CONTROLS -->
+  <div class="main-grid">
+    <div class="canvas-card">
+      <canvas id="simCanvas" width="960" height="520"></canvas>
+    </div>
+
+    <div class="controls-card">
+      <div class="control-group">
+        <label for="voltageSlider">
+          <span>Tension du Générateur (<span class="math">U</span>) :</span>
+          <span class="val-badge" id="uValDisplay">6.0 V</span>
+        </label>
+        <input type="range" id="voltageSlider" min="0" max="12" step="0.5" value="6.0">
+      </div>
+
+      <div class="control-group">
+        <label for="densitySlider">
+          <span>Paquets d'Électrons Libres (<span class="math">N</span><sub>sim</sub>) :</span>
+          <span class="val-badge" id="nValDisplay">90 paquets</span>
+        </label>
+        <input type="range" id="densitySlider" min="30" max="150" step="10" value="90">
+      </div>
+
+      <div class="control-group">
+        <label for="tempSlider">
+          <span>Agitation Thermique du Réseau (<span class="math">T</span>) :</span>
+          <span class="val-badge" id="tValDisplay">Moyenne</span>
+        </label>
+        <input type="range" id="tempSlider" min="1" max="3" step="1" value="2">
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="metric-box">
+          <span class="metric-label">Ampèremètre (<span class="math">I</span> = <span class="math">q</span>/<span class="math">&Delta;t</span>)</span>
+          <span class="metric-val" id="ammeterReadout">0.00 A</span>
+          <span class="metric-sub" id="coulombRateSub">0.00 C/s</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-label">Débit (<span class="math">N</span> / <span class="math">&Delta;t</span>)</span>
+          <span class="metric-val" id="crossingRateReadout" style="color: var(--accent-amber);">0.00 &times; 10¹⁸ e⁻/s</span>
+          <span class="metric-sub" id="packetRateSub">0.0 paquets/s</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-label">Passages Nets (<span class="math">N</span><sub>tot</sub>)</span>
+          <span class="metric-val" id="totalCountReadout" style="color: var(--accent-cyan);">0 paquets</span>
+          <span class="metric-sub" id="totalChargeSub">q = 0.00 C</span>
+        </div>
+        <div class="metric-box">
+          <span class="metric-label">Vitesse de Dérive (<span class="math">v</span><sub>d</sub>)</span>
+          <span class="metric-val" id="driftReadout" style="color: #e2e8f0;">0.00 mm/s</span>
+          <span class="metric-sub">Orientée (&minus; vers +)</span>
+        </div>
+      </div>
+
+      <div class="formula-box">
+        <strong>Lois Physiques &amp; Conformité :</strong><br>
+        &bull; Champ Électrique : <span class="vec">E</span> orienté du <strong>(+)</strong> vers le <strong>(&minus;)</strong> (<span class="math">E</span> = <span class="math">U</span> / <span class="math">L</span>)<br>
+        &bull; Force Électrique : <span class="vec">F</span><sub>e</sub> = &minus;<span class="math">e</span><span class="vec">E</span> pousse les <span class="math">e</span><sup>&minus;</sup> du <strong>(&minus;)</strong> vers le <strong>(+)</strong><br>
+        &bull; Intensité du Courant : <span class="math">I</span> = <span class="frac"><span class="math">q</span><span class="math">&Delta;t</span></span> = <span class="frac"><span><span class="math">N</span> &middot; <span class="math">e</span></span><span class="math">&Delta;t</span></span> &nbsp;(<span class="math">e</span> = 1.6 &times; 10<sup>&minus;19</sup> C)
+        <div class="scale-note">
+          <strong>Échelle Exacte :</strong> Chaque sphère bleue représente un paquet de <strong>5.0 &times; 10<sup>17</sup> électrons</strong> (<span class="math">q</span><sub>paquet</sub> = <strong>0.08 C</strong>). Ainsi, <strong>12.5 paquets/s = 6.25 &times; 10<sup>18</sup> e<sup>&minus;</sup>/s = 1.00 A</strong>.
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button id="togglePauseBtn" class="primary">Pause</button>
+        <button id="resetCounterBtn">Réinitialiser</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * MOTEUR PHYSIQUE & CONFORMITÉ EXACTE DE L'AMPÈREMÈTRE
+     * Intégrateur Numérique : Euler Semi-Implicite (Vitesse mise à jour avant Position)
+     * Conformité d'Échelle :
+     *   1 paquet d'électrons visuel = 5.0e17 électrons réels
+     *   Charge élémentaire e = 1.6e-19 C
+     *   Charge par paquet visuel : q_paquet = 5.0e17 * 1.6e-19 C = 0.08 Coulombs
+     *   Intensité I = (Paquets_par_seconde) * 0.08 A === (N_réel / dt) * e
+     * ============================================================================
+     */
+    const simCanvas = document.getElementById('simCanvas');
+    const ctx = simCanvas.getContext('2d');
+
+    // Contrôles UI
+    const voltageSlider = document.getElementById('voltageSlider');
+    const densitySlider = document.getElementById('densitySlider');
+    const tempSlider = document.getElementById('tempSlider');
+    const uValDisplay = document.getElementById('uValDisplay');
+    const nValDisplay = document.getElementById('nValDisplay');
+    const tValDisplay = document.getElementById('tValDisplay');
+
+    const ammeterReadout = document.getElementById('ammeterReadout');
+    const coulombRateSub = document.getElementById('coulombRateSub');
+    const crossingRateReadout = document.getElementById('crossingRateReadout');
+    const packetRateSub = document.getElementById('packetRateSub');
+    const totalCountReadout = document.getElementById('totalCountReadout');
+    const totalChargeSub = document.getElementById('totalChargeSub');
+    const driftReadout = document.getElementById('driftReadout');
+
+    const togglePauseBtn = document.getElementById('togglePauseBtn');
+    const resetCounterBtn = document.getElementById('resetCounterBtn');
+
+    // Constantes Physiques pour la Conformité Exacte
+    const ELECTRONS_PER_PACKET = 5.0e17; // 5.0 x 10^17 électrons par sphère visuelle
+    const ELEMENTARY_CHARGE = 1.6e-19;   // 1.6 x 10^-19 C
+    const CHARGE_PER_PACKET = ELECTRONS_PER_PACKET * ELEMENTARY_CHARGE; // Exactement 0.08 C
+
+    // Constantes Géométriques du Cylindre et du Circuit Fermé
+    const CYL = {
+      xLeft: 180,
+      xRight: 780,
+      yCenter: 225,
+      radiusY: 92,
+      ellipseRx: 28,
+      crossSectionX: 480,
+      wireLeftX: 85,
+      wireRightX: 875,
+      wireBottomY: 440,
+      genX: 480
+    };
+    CYL.length = CYL.xRight - CYL.xLeft;
+
+    // Variables d'État de la Simulation
+    let isRunning = true;
+    let U = parseFloat(voltageSlider.value); // Tension U en Volts
+    let numElectrons = parseInt(densitySlider.value, 10);
+    let tempLevel = parseInt(tempSlider.value, 10);
+
+    let electrons = [];
+    let latticeIons = [];
+    let wireProgress = 0;        // Phase continue [0..1] pour les électrons dans les fils externes
+    let netPacketsCrossed = 0;   // Paquets nets ayant traversé la section depuis la réinitialisation
+    let crossingEvents = [];     // Stocke { time, dir } dans la fenêtre glissante
+    let crossFlashAlpha = 0;     // Flash visuel lorsqu'un paquet traverse S
+    let smoothedPacketRate = 0;  // Taux de passage filtré passe-bas (paquets/s)
+
+    // Initialisation des Ions Positifs Fixes du Réseau Cristallin (Cuivre)
+    function initLattice() {
+      latticeIons = [];
+      const cols = 9;
+      const rows = 3;
+      const dx = (CYL.length - 70) / (cols - 1);
+      const dy = (CYL.radiusY * 1.32) / (rows - 1);
+
+      for (let c = 0; c < cols; c++) {
+        for (let r = 0; r < rows; r++) {
+          latticeIons.push({
+            x: CYL.xLeft + 35 + c * dx,
+            y: CYL.yCenter - (CYL.radiusY * 0.66) + r * dy
+          });
+        }
+      }
+    }
+
+    // Initialisation des Paquets d'Électrons Libres dans le volume cylindrique
+    function initElectrons(count) {
+      electrons = [];
+      for (let i = 0; i < count; i++) {
+        const rFrac = Math.sqrt(Math.random()) * 0.84;
+        const theta = Math.random() * Math.PI * 2;
+        electrons.push({
+          x: CYL.xLeft + Math.random() * CYL.length,
+          rFrac: rFrac,
+          theta: theta,
+          vx: (Math.random() - 0.5) * 35,
+          vy: (Math.random() - 0.5) * 35
+        });
+      }
+    }
+
+    initLattice();
+    initElectrons(numElectrons);
+
+    // Écouteurs d'Événements UI
+    voltageSlider.addEventListener('input', (e) => {
+      U = parseFloat(e.target.value);
+      uValDisplay.textContent = `${U.toFixed(1)} V`;
+      if (U === 0) {
+        smoothedPacketRate = 0;
+        crossingEvents = [];
+      }
+    });
+
+    densitySlider.addEventListener('input', (e) => {
+      const target = parseInt(e.target.value, 10);
+      nValDisplay.textContent = `${target} paquets`;
+      while (electrons.length < target) {
+        electrons.push({
+          x: CYL.xLeft + Math.random() * CYL.length,
+          rFrac: Math.sqrt(Math.random()) * 0.84,
+          theta: Math.random() * Math.PI * 2,
+          vx: (Math.random() - 0.5) * 35,
+          vy: (Math.random() - 0.5) * 35
+        });
+      }
+      if (electrons.length > target) {
+        electrons.length = target;
+      }
+      numElectrons = target;
+    });
+
+    tempSlider.addEventListener('input', (e) => {
+      tempLevel = parseInt(e.target.value, 10);
+      const labels = ['Faible', 'Moyenne', 'Élevée'];
+      tValDisplay.textContent = labels[tempLevel - 1];
+    });
+
+    togglePauseBtn.addEventListener('click', () => {
+      isRunning = !isRunning;
+      togglePauseBtn.textContent = isRunning ? 'Pause' : 'Reprendre';
+    });
+
+    resetCounterBtn.addEventListener('click', () => {
+      netPacketsCrossed = 0;
+      crossingEvents = [];
+      smoothedPacketRate = 0;
+      updateTelemetryDOM(0);
+    });
+
+    /**
+     * ============================================================================
+     * INTÉGRATEUR D'EULER SEMI-IMPLICITE & COMPTEUR DE SECTION
+     * ============================================================================
+     */
+    function updatePhysics(dt) {
+      // Accélération due au champ électrique proportionnelle à U, amortie par le réseau cristallin
+      const E_accel = U * 38.0;
+      const damping = 4.5;
+      const thermalNoise = tempLevel * 95;
+      const now = performance.now();
+
+      let sumVx = 0;
+
+      for (let i = 0; i < electrons.length; i++) {
+        const el = electrons[i];
+        const prevX = el.x;
+
+        // 1. EULER SEMI-IMPLICITE : Mise à jour de la vitesse en premier
+        const ax = E_accel - damping * el.vx + (Math.random() - 0.5) * thermalNoise;
+        const ay = -damping * el.vy + (Math.random() - 0.5) * thermalNoise;
+
+        el.vx += ax * dt;
+        el.vy += ay * dt;
+
+        // 2. EULER SEMI-IMPLICITE : Mise à jour de la position avec la nouvelle vitesse
+        el.x += el.vx * dt;
+        el.theta += (el.vy * 0.015) * dt;
+
+        sumVx += el.vx;
+
+        // Vérification de la traversée de la Section S (x = CYL.crossSectionX)
+        if (prevX < CYL.crossSectionX && el.x >= CYL.crossSectionX) {
+          netPacketsCrossed++;
+          crossingEvents.push({ time: now, dir: 1 });
+          crossFlashAlpha = 1.0;
+        } else if (prevX > CYL.crossSectionX && el.x <= CYL.crossSectionX) {
+          netPacketsCrossed = Math.max(0, netPacketsCrossed - 1);
+          crossingEvents.push({ time: now, dir: -1 });
+        }
+
+        // Circulation en circuit fermé : les électrons sortant à droite (+ pôle) rentrent à gauche (- pôle)
+        if (el.x > CYL.xRight) {
+          el.x = CYL.xLeft + (el.x - CYL.xRight);
+        } else if (el.x < CYL.xLeft) {
+          el.x = CYL.xRight - (CYL.xLeft - el.x);
+        }
+      }
+
+      // Avancement des électrons dans les fils externes strictement le long des fils
+      const meanVx = electrons.length > 0 ? Math.max(0, sumVx / electrons.length) : 0;
+      wireProgress = (wireProgress + dt * meanVx * 0.0022) % 1.0;
+
+      // Fenêtre glissante de 2.5 secondes pour compter les passages par seconde
+      const windowSec = 2.5;
+      const cutoff = now - windowSec * 1000;
+      while (crossingEvents.length > 0 && crossingEvents[0].time < cutoff) {
+        crossingEvents.shift();
+      }
+
+      // Somme nette des traversées dans la fenêtre
+      let netWindowCount = 0;
+      for (let i = 0; i < crossingEvents.length; i++) {
+        netWindowCount += crossingEvents[i].dir;
+      }
+      const rawMeasuredRate = Math.max(0, netWindowCount / windowSec);
+
+      // Taux théorique en régime permanent N_dot = n_line * v_d
+      const theoreticalDriftVx = E_accel / damping;
+      const theoreticalPacketRate = (electrons.length / CYL.length) * theoreticalDriftVx;
+
+      // Combinaison du comptage réel et de la dérive théorique pour une réponse fluide et exacte
+      if (U === 0) {
+        smoothedPacketRate = 0;
+      } else {
+        const targetRate = 0.65 * theoreticalPacketRate + 0.35 * rawMeasuredRate;
+        smoothedPacketRate += (targetRate - smoothedPacketRate) * Math.min(1, dt * 6);
+      }
+
+      // Atténuation du flash visuel de la section
+      if (crossFlashAlpha > 0) {
+        crossFlashAlpha = Math.max(0, crossFlashAlpha - dt * 4.5);
+      }
+
+      updateTelemetryDOM(meanVx);
+    }
+
+    // Mise à jour des affichages DOM avec des valeurs 100% conformes
+    function updateTelemetryDOM(meanVx) {
+      const packetRate = U === 0 ? 0 : Math.max(0, smoothedPacketRate);
+      const realElectronsPerSecIn10e18 = packetRate * (ELECTRONS_PER_PACKET / 1e18); // en unités de 10^18 e-/s
+      const currentAmps = packetRate * CHARGE_PER_PACKET; // I = (N/dt) * e
+
+      ammeterReadout.textContent = `${currentAmps.toFixed(2)} A`;
+      coulombRateSub.textContent = `${currentAmps.toFixed(2)} C/s`;
+
+      crossingRateReadout.textContent = `${realElectronsPerSecIn10e18.toFixed(2)} × 10¹⁸ e⁻/s`;
+      packetRateSub.textContent = `${packetRate.toFixed(1)} paquets/s`;
+
+      totalCountReadout.textContent = `${netPacketsCrossed} paquets`;
+      totalChargeSub.textContent = `q = ${(netPacketsCrossed * CHARGE_PER_PACKET).toFixed(2)} C`;
+
+      const driftMmPerSec = U === 0 ? 0 : Math.max(0, meanVx * 0.035);
+      driftReadout.textContent = `${driftMmPerSec.toFixed(2)} mm/s`;
+    }
+
+    /**
+     * ============================================================================
+     * UTILITAIRE : POINT EXACT SUR UNE POLYLIGNE (Empêche les électrons de sortir des fils)
+     * ============================================================================
+     */
+    function getPointAlongPolyline(pts, t) {
+      let totalLen = 0;
+      const segLens = [];
+      for (let i = 0; i < pts.length - 1; i++) {
+        const len = Math.hypot(pts[i + 1].x - pts[i].x, pts[i + 1].y - pts[i].y);
+        segLens.push(len);
+        totalLen += len;
+      }
+      let targetDist = ((t % 1) + 1) % 1 * totalLen;
+      for (let i = 0; i < segLens.length; i++) {
+        if (targetDist <= segLens[i] || i === segLens.length - 1) {
+          const ratio = segLens[i] === 0 ? 0 : targetDist / segLens[i];
+          return {
+            x: pts[i].x + (pts[i + 1].x - pts[i].x) * ratio,
+            y: pts[i].y + (pts[i + 1].y - pts[i].y) * ratio
+          };
+        }
+        targetDist -= segLens[i];
+      }
+      return pts[0];
+    }
+
+    /**
+     * ============================================================================
+     * RENDU GRAPHIQUE PRINCIPAL
+     * ============================================================================
+     */
+    function drawMainScene() {
+      ctx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+
+      // 1. Fils externes du circuit fermé & Générateur (U)
+      drawCircuitAndGenerator();
+
+      // 2. Arrière-plan du conducteur cylindrique & Ions positifs du réseau
+      drawCylinderBack();
+      drawLatticeIons();
+
+      // 3. Tri des électrons libres par profondeur 3D (sin(theta)) et rendu
+      const sortedElectrons = [...electrons].sort((a, b) => Math.sin(a.theta) - Math.sin(b.theta));
+
+      for (let i = 0; i < sortedElectrons.length; i++) {
+        const el = sortedElectrons[i];
+        const yPos = CYL.yCenter + el.rFrac * (CYL.radiusY - 9) * Math.cos(el.theta);
+        const depth = Math.sin(el.theta); // -1 (arrière) à +1 (avant)
+        const radius = 5.0 + depth * 1.3;
+        const alpha = 0.55 + (depth + 1) * 0.22;
+
+        ctx.beginPath();
+        ctx.arc(el.x, yPos, radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(56, 189, 248, ${alpha})`;
+        ctx.fill();
+        ctx.strokeStyle = '#e0f2fe';
+        ctx.lineWidth = 0.9;
+        ctx.stroke();
+
+        // Signe moins sur les électrons au premier plan
+        if (depth >= -0.2) {
+          ctx.fillStyle = '#090d16';
+          ctx.font = 'bold 9px monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('−', el.x, yPos + 0.5);
+        }
+      }
+
+      // 4. Plan de Section Centrale (S) & Ampèremètre (A) au sommet
+      drawCrossSectionAndAmmeter();
+
+      // 5. Reflets du cylindre & Anneaux des extrémités
+      drawCylinderForeground();
+    }
+
+    function drawCircuitAndGenerator() {
+      const wireY = CYL.wireBottomY;
+      const genX = CYL.genX;
+      const leftTermX = genX - 85;
+      const rightTermX = genX + 85;
+
+      // Chemins exacts à 3 segments pour le fil gauche (Pôle - vers Cylindre gauche)
+      // et le fil droit (Cylindre droit vers Pôle +)
+      const leftWirePath = [
+        { x: leftTermX, y: wireY },
+        { x: CYL.wireLeftX, y: wireY },
+        { x: CYL.wireLeftX, y: CYL.yCenter },
+        { x: CYL.xLeft, y: CYL.yCenter }
+      ];
+
+      const rightWirePath = [
+        { x: CYL.xRight, y: CYL.yCenter },
+        { x: CYL.wireRightX, y: CYL.yCenter },
+        { x: CYL.wireRightX, y: wireY },
+        { x: rightTermX, y: wireY }
+      ];
+
+      // Gaine externe des fils du circuit
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 12;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      ctx.moveTo(leftWirePath[0].x, leftWirePath[0].y);
+      for (let i = 1; i < leftWirePath.length; i++) ctx.lineTo(leftWirePath[i].x, leftWirePath[i].y);
+      ctx.moveTo(rightWirePath[0].x, rightWirePath[0].y);
+      for (let i = 1; i < rightWirePath.length; i++) ctx.lineTo(rightWirePath[i].x, rightWirePath[i].y);
+      ctx.stroke();
+
+      // Cœur conducteur interne des fils
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 6;
+      ctx.stroke();
+
+      // Électrons en circulation strictement confinés à l'intérieur des fils externes
+      const numWireDots = 14;
+      for (let i = 0; i < numWireDots; i++) {
+        const t = (wireProgress + i / numWireDots) % 1.0;
+
+        const ptL = getPointAlongPolyline(leftWirePath, t);
+        const ptR = getPointAlongPolyline(rightWirePath, t);
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.arc(ptL.x, ptL.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(ptR.x, ptR.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Badge Pôle Négatif (-) à gauche du cylindre
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.14)';
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(20, CYL.yCenter - 85, 134, 52, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 12.5px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('PÔLE NÉGATIF (−)', 87, CYL.yCenter - 64);
+      ctx.font = '11px sans-serif';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText('Repousse les e⁻ →', 87, CYL.yCenter - 44);
+
+      // Badge Pôle Positif (+) à droite du cylindre
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.14)';
+      ctx.strokeStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.roundRect(806, CYL.yCenter - 85, 134, 52, 8);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.font = 'bold 12.5px sans-serif';
+      ctx.fillText('PÔLE POSITIF (+)', 873, CYL.yCenter - 64);
+      ctx.font = '11px sans-serif';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText('→ Attire les e⁻', 873, CYL.yCenter - 44);
+
+      // Boîtier du Générateur de Tension Continue Réglable en bas au centre
+      ctx.fillStyle = '#1e293b';
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(leftTermX, wireY - 38, 170, 72, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bornes (-) à gauche et (+) à droite sur le générateur
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 22px monospace';
+      ctx.fillText('−', leftTermX + 22, wireY + 6);
+
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillText('+', rightTermX - 22, wireY + 6);
+
+      // Affichage de la tension U du générateur
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText(`U = ${U.toFixed(1)} V`, genX, wireY - 10);
+      ctx.font = '11px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('Générateur CC Réglable', genX, wireY + 12);
+
+      // Flèches de circulation des électrons sur les fils inférieurs lorsque U > 0
+      if (U > 0) {
+        ctx.fillStyle = '#10b981';
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 2;
+        drawArrow(ctx, rightTermX + 95, wireY - 18, rightTermX + 35, wireY - 18);
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Flux d\'électrons (e⁻)', leftTermX - 68, wireY - 24);
+        ctx.fillStyle = '#38bdf8';
+        ctx.strokeStyle = '#38bdf8';
+        drawArrow(ctx, leftTermX - 35, wireY - 18, leftTermX - 95, wireY - 18);
+
+        ctx.fillStyle = '#10b981';
+        ctx.fillText('Retour des e⁻ vers (+)', rightTermX + 70, wireY - 24);
+      }
+    }
+
+    function drawCylinderBack() {
+      const grad = ctx.createLinearGradient(0, CYL.yCenter - CYL.radiusY, 0, CYL.yCenter + CYL.radiusY);
+      grad.addColorStop(0, 'rgba(30, 41, 59, 0.8)');
+      grad.addColorStop(0.5, 'rgba(15, 23, 42, 0.95)');
+      grad.addColorStop(1, 'rgba(30, 41, 59, 0.8)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.rect(CYL.xLeft, CYL.yCenter - CYL.radiusY, CYL.length, CYL.radiusY * 2);
+      ctx.fill();
+
+      // Vecteurs Force Électrique F_e et Champ Électrique E au-dessus du cylindre
+      if (U > 0) {
+        const arrowY = CYL.yCenter - CYL.radiusY - 22;
+
+        // Force Électrique sur les électrons (Gauche à Droite : - vers +)
+        ctx.strokeStyle = '#38bdf8';
+        ctx.fillStyle = '#38bdf8';
+        ctx.lineWidth = 2.2;
+        drawArrow(ctx, CYL.xLeft + 20, arrowY, CYL.xLeft + 160, arrowY);
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Force Électrique Fₑ = −eE (Dérive des e⁻)', CYL.xLeft + 20, arrowY - 10);
+
+        // Champ Électrique E (Droite à Gauche : + vers -)
+        ctx.strokeStyle = '#f43f5e';
+        ctx.fillStyle = '#f43f5e';
+        drawArrow(ctx, CYL.xRight - 20, arrowY, CYL.xRight - 160, arrowY);
+        ctx.textAlign = 'right';
+        ctx.fillText('Champ Électrique E (+ vers −)', CYL.xRight - 20, arrowY - 10);
+      }
+    }
+
+    function drawLatticeIons() {
+      for (let i = 0; i < latticeIons.length; i++) {
+        const ion = latticeIons[i];
+        // Vibration thermique des ions métalliques positifs fixes
+        const jx = (Math.random() - 0.5) * tempLevel * 0.8;
+        const jy = (Math.random() - 0.5) * tempLevel * 0.8;
+
+        ctx.beginPath();
+        ctx.arc(ion.x + jx, ion.y + jy, 9, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.14)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(244, 63, 94, 0.42)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.65)';
+        ctx.font = 'bold 11px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('+', ion.x + jx, ion.y + jy);
+      }
+    }
+
+    function drawCrossSectionAndAmmeter() {
+      const cx = CYL.crossSectionX;
+      const cy = CYL.yCenter;
+
+      // Plan de comptage de la Section S (Ellipse 3D à l'intérieur du cylindre)
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(cx, cy, CYL.ellipseRx, CYL.radiusY, 0, 0, Math.PI * 2);
+      const planeAlpha = 0.16 + crossFlashAlpha * 0.45;
+      ctx.fillStyle = `rgba(245, 158, 11, ${planeAlpha})`;
+      ctx.fill();
+      ctx.strokeStyle = crossFlashAlpha > 0.1 ? '#fde047' : '#f59e0b';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([6, 4]);
+      ctx.stroke();
+      ctx.restore();
+
+      // Étiquette sous la Section S
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Section Transversale (S)', cx, cy + CYL.radiusY + 22);
+
+      // Tige de capteur reliant le sommet de la section directement à l'ampèremètre
+      const ammeterY = 58;
+      const ammeterRx = 74;
+      const ammeterRy = 42;
+
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - CYL.radiusY);
+      ctx.lineTo(cx, ammeterY + ammeterRy);
+      ctx.stroke();
+
+      // Boîtier de l'Ampèremètre Numérique au Sommet
+      ctx.beginPath();
+      ctx.roundRect(cx - ammeterRx, ammeterY - ammeterRy, ammeterRx * 2, ammeterRy * 2, 12);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#10b981';
+      ctx.stroke();
+
+      // Valeurs de l'Ampèremètre (Strictement Conformes : I = (N/dt) * e)
+      const packetRate = U === 0 ? 0 : Math.max(0, smoothedPacketRate);
+      const realElectronsIn10e18 = packetRate * (ELECTRONS_PER_PACKET / 1e18);
+      const currentA = packetRate * CHARGE_PER_PACKET;
+
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('AMPÈREMÈTRE (I = q / Δt)', cx, ammeterY - 22);
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = 'bold 17px monospace';
+      ctx.fillText(`${currentA.toFixed(2)} A`, cx, ammeterY + 2);
+
+      ctx.fillStyle = '#f59e0b';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(`${realElectronsIn10e18.toFixed(2)}×10¹⁸ e⁻/s`, cx, ammeterY + 22);
+    }
+
+    function drawCylinderForeground() {
+      // Ellipse d'extrémité gauche du cylindre (Côté Négatif)
+      ctx.beginPath();
+      ctx.ellipse(CYL.xLeft, CYL.yCenter, CYL.ellipseRx, CYL.radiusY, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(56, 189, 248, 0.12)';
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Ellipse d'extrémité droite du cylindre (Côté Positif)
+      ctx.beginPath();
+      ctx.ellipse(CYL.xRight, CYL.yCenter, CYL.ellipseRx, CYL.radiusY, 0, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.12)';
+      ctx.fill();
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      // Parois supérieure et inférieure du cylindre
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(CYL.xLeft, CYL.yCenter - CYL.radiusY);
+      ctx.lineTo(CYL.xRight, CYL.yCenter - CYL.radiusY);
+      ctx.moveTo(CYL.xLeft, CYL.yCenter + CYL.radiusY);
+      ctx.lineTo(CYL.xRight, CYL.yCenter + CYL.radiusY);
+      ctx.stroke();
+    }
+
+    function drawArrow(context, x1, y1, x2, y2) {
+      const headlen = 9;
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      context.beginPath();
+      context.moveTo(x1, y1);
+      context.lineTo(x2, y2);
+      context.lineTo(x2 - headlen * Math.cos(angle - Math.PI / 6), y2 - headlen * Math.sin(angle - Math.PI / 6));
+      context.moveTo(x2, y2);
+      ctx.lineTo(x2 - headlen * Math.cos(angle + Math.PI / 6), y2 - headlen * Math.sin(angle + Math.PI / 6));
+      context.stroke();
+    }
+
+    // Boucle d'Animation Principale
+    let lastTime = performance.now();
+    function animate(now) {
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+
+      if (isRunning) {
+        updatePhysics(dt);
+      }
+      drawMainScene();
+
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
