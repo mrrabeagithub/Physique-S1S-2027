@@ -105,35 +105,35 @@
       <article class="card">
         <h2>📘 Cours</h2>
         <p>Résumé du cours sur la courant électrique.</p>
-        <div class="resources" data-folder="01-Cours" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="01-Cours" aria-live="polite"><p>Bientôt disponible</p></div>
       </article>
 
       <article class="card">
         <h2>✏️ Exercices</h2>
         <p>Exercices et activités d'entraînement.</p>
-        <div class="resources" data-folder="02-Exercices" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="02-Exercices" aria-live="polite"><p>Bientôt disponible</p></div>
       </article>
 
       <article class="card">
         <h2>🧪 Simulations</h2>
         <p>Simulations interactives liées au chapitre.</p>
-        <div class="resources" data-folder="03-Simulations" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="03-Simulations" aria-live="polite"><ul><li><a href="./03-Simulations/Courant%20Electrique%20-%20L'amp%C3%A8re.html?v=f74d1e5832dfdc405707294d2fa6e44889c8ab5e">Courant Electrique - L'ampère.html</a></li></ul></div>
       </article>
 
       <article class="card">
         <h2>📊 Infographiques</h2>
         <p>Schémas et supports visuels de révision.</p>
-        <div class="resources" data-folder="04-Infographiques" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="04-Infographiques" aria-live="polite"><p>Bientôt disponible</p></div>
       </article>
       <article class="card">
         <h2>✅ Solutions</h2>
         <p>Corrigés des exercices et des évaluations.</p>
-        <div class="resources" data-folder="05-Solutions" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="05-Solutions" aria-live="polite"><p>Bientôt disponible</p></div>
       </article>
       <article class="card">
         <h2>🎬 Vidéos</h2>
         <p>Vidéos explicatives liées au chapitre.</p>
-        <div class="resources" data-folder="06-Vidéos" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="06-Vidéos" aria-live="polite"><ul><li><a href="./06-Vid%C3%A9os/VID-20261014-WA0002.mp4?v=0a23a5e368e13392fee440b6ddf29f1282d1c82a">VID-20261014-WA0002.mp4</a></li></ul></div>
       </article>
     </section>
 
@@ -141,13 +141,13 @@
       Physique S1S • Chapitre 3 — Le courant électrique
     </footer>
   </main>
-  <noscript><p>Activez JavaScript pour afficher les ressources du chapitre.</p></noscript>
+  
   <script>
 (async () => {
   // Discover files on each visit: resource filenames are never hard-coded.
   const repository = "mrrabeagithub/Physique-S1S-2027";
   const branch = "main";
-  const chapter = decodeURIComponent(new URL(".", location.href).pathname.split("/").filter(Boolean).pop());
+  const chapter = "Chapitre 3: Le courant électrique";
   const encodePath = path => path.split("/").map(encodeURIComponent).join("/");
   const sections = [...document.querySelectorAll("[data-folder]")];
   const controller = new AbortController();
@@ -186,11 +186,7 @@
       section.append(list);
     }
   } catch (error) {
-    for (const section of sections) {
-      const message = document.createElement("p");
-      message.textContent = "Les ressources sont temporairement indisponibles. Veuillez actualiser la page dans quelques instants.";
-      section.replaceChildren(message);
-    }
+    // Keep the published resource links if live discovery is unavailable.
   } finally {
     clearTimeout(timeout);
   }
