@@ -105,35 +105,35 @@
       <article class="card">
         <h2>📘 Cours</h2>
         <p>Résumé du cours sur la tension électrique.</p>
-        <div class="resources" data-folder="01-Cours" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="01-Cours" aria-live="polite"><ul><li><a href="./01-Cours/Resume%20Ch2%20Tension%20Electrique%20S1S.pdf?v=63e3614c4c6c9deddd1e1177bd6b64de358176dc">Resume Ch2 Tension Electrique S1S.pdf</a></li></ul></div>
       </article>
 
       <article class="card">
         <h2>✏️ Exercices</h2>
         <p>Exercices et activités d'entraînement.</p>
-        <div class="resources" data-folder="02-Exercices" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="02-Exercices" aria-live="polite"><p>Bientôt disponible</p></div>
       </article>
 
       <article class="card">
         <h2>🧪 Simulations</h2>
         <p>Simulations interactives liées au chapitre.</p>
-        <div class="resources" data-folder="03-Simulations" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="03-Simulations" aria-live="polite"><ul><li><a href="./03-Simulations/Analog%20Voltmeter%20Simulator%20V2.Html?v=15298f4f73b1d6c854ec29729a8c3b251d73361e">Analog Voltmeter Simulator V2.Html</a></li></ul></div>
       </article>
 
       <article class="card">
         <h2>📊 Infographiques</h2>
         <p>Schémas et supports visuels de révision.</p>
-        <div class="resources" data-folder="04-Infographiques" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="04-Infographiques" aria-live="polite"><ul><li><a href="./04-Infographiques/Oscilloscope.jpg?v=118d58c776f3200c4c9151776815af6c20120c1d">Oscilloscope.jpg</a></li><li><a href="./04-Infographiques/Voltmetre%20Analogique.png?v=34a9cce10a1a5875b53fe5930cb1c8687c0a5a16">Voltmetre Analogique.png</a></li></ul></div>
       </article>
       <article class="card">
         <h2>✅ Solutions</h2>
         <p>Corrigés des exercices et des évaluations.</p>
-        <div class="resources" data-folder="05-Solutions" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="05-Solutions" aria-live="polite"><ul><li><a href="./05-Solutions/2027_S1S_Quiz1_Ch2_Corrig%C3%A9%2BBar%C3%A8me.pdf?v=6020e9d6e436a247ea57cf949835fad594fbe8b9">2027_S1S_Quiz1_Ch2_Corrigé+Barème.pdf</a></li></ul></div>
       </article>
       <article class="card">
         <h2>🎬 Vidéos</h2>
         <p>Vidéos explicatives liées au chapitre.</p>
-        <div class="resources" data-folder="06-Vidéos" aria-live="polite"><p>Chargement des ressources…</p></div>
+        <div class="resources" data-folder="06-Vidéos" aria-live="polite"><p>Bientôt disponible</p></div>
       </article>
     </section>
 
@@ -141,13 +141,13 @@
       Physique S1S • Chapitre 2 — Tension électrique
     </footer>
   </main>
-  <noscript><p>Activez JavaScript pour afficher les ressources du chapitre.</p></noscript>
+  
   <script>
 (async () => {
   // Discover files on each visit: resource filenames are never hard-coded.
   const repository = "mrrabeagithub/Physique-S1S-2027";
   const branch = "main";
-  const chapter = decodeURIComponent(new URL(".", location.href).pathname.split("/").filter(Boolean).pop());
+  const chapter = "Chapitre 2: Tension électrique";
   const encodePath = path => path.split("/").map(encodeURIComponent).join("/");
   const sections = [...document.querySelectorAll("[data-folder]")];
   const controller = new AbortController();
@@ -186,11 +186,7 @@
       section.append(list);
     }
   } catch (error) {
-    for (const section of sections) {
-      const message = document.createElement("p");
-      message.textContent = "Les ressources sont temporairement indisponibles. Veuillez actualiser la page dans quelques instants.";
-      section.replaceChildren(message);
-    }
+    // Keep the published resource links if live discovery is unavailable.
   } finally {
     clearTimeout(timeout);
   }
