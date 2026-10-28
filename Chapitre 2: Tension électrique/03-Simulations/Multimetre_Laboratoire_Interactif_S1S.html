@@ -58,7 +58,7 @@
       </div>
       <div class="ports"><div class="port"><span class="socket plug-black" id="socket-com"></span><span>COM</span></div><div class="port"><span class="socket plug-red" id="socket-v"></span><span>VΩ</span></div><div class="port"><span class="socket" id="socket-a"></span><span>2 A</span></div></div>
    </div>
-   <p class="meter-caption">Fil noir : COM &nbsp; • &nbsp; Fil rouge : borne au choix</p>
+   <p class="meter-caption">Cliquer sur un calibre autour du sélecteur · Fil noir : COM, fil rouge : borne au choix</p>
    <div class="control-side"><div class="control-group"><div class="control-label">Borne utilisée par le fil rouge</div><div class="row-2"><button class="choice" id="jack-v" aria-pressed="true">● VΩ</button><button class="choice" id="jack-a" aria-pressed="false">● 2 A</button></div></div>
     <div class="control-group"><div class="control-label">Calibre du sélecteur</div><div class="choices" id="ranges" role="group" aria-label="Calibre"><button class="range" data-range="OFF">OFF</button><button class="range" data-range="V200">200 V</button><button class="range" data-range="V20">20 V</button><button class="range" data-range="V2">2 V</button><button class="range" data-range="A200m">200 mA</button><button class="range" data-range="A2">2 A</button></div></div>
     <div class="alert" id="feedback" aria-live="polite"><span class="symbol" id="feedback-symbol">✓</span><div><strong id="feedback-title">Mesure correcte</strong><p id="feedback-body">Place tes sondes et observe la lecture.</p></div></div>
@@ -94,16 +94,16 @@ function physics(s){
  const lampU=circulating?s.E:0;
  const switchU=s.closed||bridge?0:s.E;
  const volts={pile:s.E,lampe:lampU,interrupteur:switchU,fil:0,serie:s.closed?s.E:0};
- let type='good',title='',message='',value=null,units='',display='—',kind=isA(s.mode)?'DC A':'DC V';
+ let type='good',title='',message='',value=null,units='',display='—',kind=s.mode==='OFF'?'ARRÊT':isA(s.mode)?'DC A':'DC V';
  if(s.blown&&s.jack==='A') {type='bad';title='Fusible grillé';message="Le fusible interne est coupé. Remplace-le, puis corrige le branchement avant de continuer.";display='FUSE';}
  else if(s.mode==='OFF'){type='warn';title='Multimètre éteint';message='Tourne le sélecteur sur un calibre de tension ou d’intensité.';display='OFF';}
  else if(s.jack==='V'&&isA(s.mode)){type='warn';title='Mauvaise borne';message='Le sélecteur est sur A, mais le fil rouge est branché à VΩ. Branche-le sur 2 A.';display='—';}
  else if(s.jack==='A'&&isV(s.mode)){type='bad';title='Mauvaise borne';message='Le fil rouge est branché sur 2 A alors que le sélecteur est sur V. Évite ce branchement : replace le fil sur VΩ.';display='—';}
- else if(s.place==='serie'&&isV(s.mode)){type='warn';title='Voltmètre inséré en série';message='Le voltmètre possède une grande résistance interne : il empêche pratiquement le courant de circuler. Branche-le en dérivation.';value=s.closed?s.E:0;units='V';}
+ else if(s.place==='serie'&&isV(s.mode)){type='warn';title='Voltmètre inséré en série';message=s.closed?'Le voltmètre possède une grande résistance interne : la lampe est éteinte et presque toute la tension de la pile est mesurée à ses bornes. Branche-le en dérivation.':'Le circuit présente deux coupures (interrupteur et insertion du voltmètre) : un point est flottant, donc la lecture idéale n’est pas déterminée. Branche le voltmètre en dérivation.';value=s.closed?s.E:null;units='V';if(value!==null&&Math.abs(value)>ranges[s.mode]+1e-9){title='Dépassement de calibre';message=`La tension aux bornes du voltmètre en série (${n(Math.abs(value))} V) dépasse le calibre ${n(ranges[s.mode])} V. Choisis un calibre supérieur, puis branche-le en dérivation.`;display='OL';value=null;}}
  else if(isV(s.mode)){
    value=(s.swap?-1:1)*volts[s.place]; units='V';
    if(Math.abs(value)>ranges[s.mode]+1e-9){type='warn';title='Dépassement de calibre';message=`${n(Math.abs(value))} V dépasse le calibre ${n(ranges[s.mode])} V. Choisis un calibre plus grand.`;display='OL';value=null;}
-   else {title='Mesure de tension';message=s.place==='fil'?'Deux points d’un même fil idéal ont le même potentiel.':s.place==='lampe'&&!circulating?'L’interrupteur est ouvert : aucun courant ne circule, donc la tension de la lampe résistive est nulle.':s.place==='interrupteur'&&!s.closed?'L’interrupteur ouvert supporte ici toute la tension de la pile.':s.swap?'Tu as inversé les sondes : la tension affichée change de signe.':'La borne rouge VΩ est au potentiel supérieur à la borne noire COM.';}
+   else {title='Mesure de tension';message=s.place==='fil'?'Deux points d’un même fil idéal sont au même potentiel : U = 0 V.':s.place==='lampe'&&!circulating?'L’interrupteur est ouvert : aucun courant ne circule, donc la tension de la lampe résistive est nulle.':s.place==='interrupteur'&&!s.closed?'L’interrupteur ouvert supporte la tension de la pile ; le signe dépend de l’ordre des sondes.':Math.abs(value)<1e-9?'Les deux sondes sont au même potentiel : la tension mesurée est nulle.':s.swap?'Tu as inversé les sondes : la tension affichée est négative.':'La borne rouge VΩ est à un potentiel supérieur à celui de COM.';}
  }
  else if(isA(s.mode)){
   units=s.mode==='A200m'?'mA':'A';value=(s.swap?-1:1)*(s.place==='serie'||bridge?I:0);
@@ -131,7 +131,7 @@ function render(){const s=state,p=physics(s);
  $('digits').textContent=p.display;$('digits').classList.toggle('safety',p.display==='FUSE');$('unit').textContent=p.units?(p.units+' ⎓'):'';$('lcd-kind').textContent=p.kind;
  $('lamp').classList.toggle('on',p.I>0);$('ray1').classList.toggle('on',p.I>0);
  $('switch-arm').setAttribute('d',s.closed?'M583 289 L645 289':'M583 289 L628 266');
- $('gap-closed').style.display=s.place==='serie'?'none':'';$('gap-meter').style.display=s.place==='serie'?'':'none';$('series-letter').textContent=isA(s.mode)?'A':'V';
+ $('gap-closed').style.display=s.place==='serie'?'none':'';$('gap-meter').style.display=s.place==='serie'?'':'none';$('series-letter').textContent=s.mode==='OFF'?'–':isA(s.mode)?'A':'V';
  $('flow-top').setAttribute('class',p.circulating?'wire-motion runline running':'runline');$('flow-bottom').setAttribute('class',p.circulating?'wire-motion runline running':'runline');
  $('circuit-state').textContent=p.circulating?'Courant établi':'Courant interrompu';$('live-dot').style.background=p.circulating?'#70e2a2':'#ebac79';
  $('metric-voltage').textContent=n(s.E)+' V';$('metric-current').textContent=p.I.toFixed(3).replace('.',',')+' A';$('metric-lamp').textContent=p.I>0?'Allumée':'Éteinte';
@@ -141,7 +141,8 @@ function render(){const s=state,p=physics(s);
  document.querySelectorAll('[data-range]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.range===s.mode)));
  $('jack-v').setAttribute('aria-pressed',String(s.jack==='V'));$('jack-a').setAttribute('aria-pressed',String(s.jack==='A'));
  $('socket-v').classList.toggle('plug-red',s.jack==='V');$('socket-a').classList.toggle('plug-red',s.jack==='A');
- const rot={OFF:-125,V200:-72,V20:-26,V2:28,A200m:85,A2:148};$('dial').style.transform=`rotate(${rot[s.mode]}deg)`;
+ // Align the physical selector pointer with the actual positions of the printed range labels.
+ const rot={OFF:-59,V200:-31,V20:39,V2:66,A200m:129,A2:230};$('dial').style.transform=`rotate(${rot[s.mode]}deg)`;
  document.querySelectorAll('.dial-key').forEach(b=>b.classList.toggle('active',b.dataset.mode===s.mode));
  $('feedback').className='alert'+(p.type==='warn'?' warn':p.type==='bad'?' bad':'');$('feedback-symbol').textContent=p.type==='bad'?'⚠':p.type==='warn'?'!':'✓';
  $('feedback-title').textContent=s._justBlew?'Court-circuit : fusible grillé':p.title;
