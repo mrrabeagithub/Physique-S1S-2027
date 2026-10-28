@@ -141,8 +141,11 @@ function render(){const s=state,p=physics(s);
  document.querySelectorAll('[data-range]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.range===s.mode)));
  $('jack-v').setAttribute('aria-pressed',String(s.jack==='V'));$('jack-a').setAttribute('aria-pressed',String(s.jack==='A'));
  $('socket-v').classList.toggle('plug-red',s.jack==='V');$('socket-a').classList.toggle('plug-red',s.jack==='A');
- // Align the physical selector pointer with the actual positions of the printed range labels.
- const rot={OFF:-59,V200:-31,V20:39,V2:66,A200m:129,A2:230};$('dial').style.transform=`rotate(${rot[s.mode]}deg)`;
+ // Derive selector angle from the actual label position, including on small screens.
+ const d=$('dial').getBoundingClientRect(), t=document.querySelector('.dial-key[data-mode="'+s.mode+'"]').getBoundingClientRect();
+ const dx=t.left+t.width/2-d.left-d.width/2,dy=t.top+t.height/2-d.top-d.height/2;
+ let degrees=Math.atan2(dx,-dy)*180/Math.PI;if(degrees<-90)degrees+=360;
+ $('dial').style.transform=`rotate(${degrees.toFixed(2)}deg)`;
  document.querySelectorAll('.dial-key').forEach(b=>b.classList.toggle('active',b.dataset.mode===s.mode));
  $('feedback').className='alert'+(p.type==='warn'?' warn':p.type==='bad'?' bad':'');$('feedback-symbol').textContent=p.type==='bad'?'⚠':p.type==='warn'?'!':'✓';
  $('feedback-title').textContent=s._justBlew?'Court-circuit : fusible grillé':p.title;
@@ -163,6 +166,7 @@ document.querySelectorAll('[data-range],[data-mode]').forEach(b=>b.addEventListe
 $('source').addEventListener('input',e=>apply({E:+e.target.value}));$('resistor').addEventListener('input',e=>apply({R:+e.target.value}));$('fuse').addEventListener('click',()=>apply({blown:false}));
 const tasks=[s=>s.place==='pile'&&s.jack==='V'&&s.mode==='V20'&&!s.swap&&!s.blown&&s.E<=20,s=>s.place==='lampe'&&!s.closed&&s.jack==='V'&&s.mode==='V20'&&!s.blown,s=>s.place==='serie'&&s.closed&&s.jack==='A'&&s.mode==='A2'&&!s.blown&&s.E/s.R<=2];
 document.querySelectorAll('.mission-row').forEach((r,k)=>r.querySelector('button').addEventListener('click',()=>{if(tasks[k](state)){completed.add(k);r.classList.add('complete');r.querySelector('button').textContent='✓ Réussi';$('task-feedback').textContent='✓ Défi '+(k+1)+' validé. '+completed.size+' / 3 réussis.';}else{$('task-feedback').textContent='↳ Défi '+(k+1)+' : vérifie le montage, la borne, le calibre, l’interrupteur et la polarité.';}}));
+window.addEventListener('resize',render);
 render();
 </script>
 </body></html>
