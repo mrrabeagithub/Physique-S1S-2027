@@ -9,7 +9,7 @@ async function request(data){
  if(!response.ok)throw Error('Connexion indisponible. Réessayez.');
  const result=await response.json();if(!result.ok)throw Error(result.error||'Enregistrement refusé.');return result;
 }
-function save(){if(!studentCode)return;try{localStorage.setItem(evaluationId+':'+studentCode,JSON.stringify({votes,attemptId,pending}));}catch{}}
+function save(){if(!studentCode)return;try{localStorage.setItem(evaluationId+':'+studentCode,JSON.stringify({votes,revealed,attemptId,pending}));}catch{}}
 document.getElementById('login').onclick=async()=>{
  const button=document.getElementById('login');button.disabled=true;
  try{
@@ -17,8 +17,8 @@ document.getElementById('login').onclick=async()=>{
  if(!/^s1s\d{4}$/.test(studentCode))throw Error('Saisissez votre code s1s suivi de quatre chiffres.');
  await request({action:'login',code:studentCode,evalId:evaluationId});
  attemptId=crypto.randomUUID();
- try{const old=JSON.parse(localStorage.getItem(evaluationId+':'+studentCode));if(old){votes=old.votes||{};attemptId=old.attemptId||attemptId;pending=old.pending||null;}}catch{}
- window.studentReady=true;document.getElementById('access').hidden=true;document.getElementById('activity').hidden=false;render();
+ try{const old=JSON.parse(localStorage.getItem(evaluationId+':'+studentCode));if(old){votes=old.votes||{};revealed=old.revealed||{};attemptId=old.attemptId||attemptId;pending=old.pending||null;}}catch{}
+ if(pending?.answers){votes=Object.fromEntries(pending.answers.map((a,i)=>[i,a]));revealed=Object.fromEntries(pending.answers.map((a,i)=>[i,true]));}window.studentReady=true;document.getElementById('access').hidden=true;document.getElementById('activity').hidden=false;render();
  }catch(e){statusEl.textContent=e.message;}finally{button.disabled=false;}
 };
 document.addEventListener('click',save);document.addEventListener('keyup',save);
